@@ -1,23 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const { messages, system } = body;
+  const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
 
-    if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json({ error: "Missing messages" }, { status: 400 });
-    }
+  if (!apiKey) {
+    console.error("[/api/chat] ANTHROPIC_API_KEY is not set");
+    return NextResponse.json({
+      text: "Server error: add ANTHROPIC_API_KEY to .env.local and restart the dev server.",
+    });
+  }
+
+  try {
+    const { messages, system } = await req.json();
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY || "",
+        "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 1000,
         system: system || "",
         messages,
@@ -27,17 +31,20 @@ export async function POST(req: NextRequest) {
     const data = await response.json();
 
     if (!response.ok) {
-      return NextResponse.json(
-        { error: data.error?.message || "API error" },
-        { status: response.status }
-      );
+      const errMsg = data?.error?.message || `API error (${response.status})`;
+      console.error("[/api/chat] Anthropic error:", data?.error);
+      return NextResponse.json({ text: `⚠️ ${errMsg}` });
     }
 
-    return NextResponse.json(data);
-  } catch {
-    return NextResponse.json(
-      { error: "Server error — please try again." },
-      { status: 500 }
-    );
+    const text = data?.content?.[0]?.text;
+    if (!text) {
+      console.error("[/api/chat] No text in Anthropic response:", data);
+      return NextResponse.json({ text: "Something went wrong — empty response from AI." });
+    }
+
+    return NextResponse.json({ text });
+  } catch (error) {
+    console.error("[/api/chat] Unexpected error:", error);
+    return NextResponse.json({ text: "Connection error — please try again." });
   }
 }

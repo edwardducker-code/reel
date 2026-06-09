@@ -545,7 +545,26 @@ export default function Page() {
         }),
       });
       const d = await r.json();
-      const raw = d.content?.[0]?.text || "⚠️ Something went wrong — please try again.";
+      if (!r.ok) {
+        console.error("[REEL] Chat API error:", { status: r.status, error: d.error });
+        setMsgs((p) => [
+          ...p,
+          {
+            id: Date.now() + 1,
+            role: "assistant",
+            content: `⚠️ ${typeof d.error === "string" ? d.error : d.error?.message || "Something went wrong — please try again."}`,
+          },
+        ]);
+        return;
+      }
+      const raw = d.text;
+      if (!raw) {
+        setMsgs((p) => [
+          ...p,
+          { id: Date.now() + 1, role: "assistant", content: "⚠️ No response text received from server." },
+        ]);
+        return;
+      }
       const tracked = getTrack(raw);
       let cw = wl,
         cf = fu;
@@ -556,12 +575,12 @@ export default function Page() {
         setWl(cw);
         setFu(cf);
       }
-      const display = rmTrack(raw);
-      const msg: Message = { id: Date.now() + 1, role: "assistant", content: display };
+      const msg: Message = { id: Date.now() + 1, role: "assistant", content: rmTrack(raw) };
       const fm = [...nm, msg];
       setMsgs(fm);
       store.set(SK.ms, fm.slice(-30));
-    } catch {
+    } catch (error) {
+      console.error("[REEL] Send failed:", error);
       setMsgs((p) => [...p, { id: Date.now() + 1, role: "assistant", content: "⚠️ Connection issue — please try again." }]);
     } finally {
       setBusy(false);
@@ -602,7 +621,7 @@ export default function Page() {
         margin: "0 auto",
       }}
     >
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap');*{box-sizing:border-box}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:${BR};border-radius:2px}`}</style>
+      <style>{`*{box-sizing:border-box}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:${BR};border-radius:2px}`}</style>
 
       <div
         style={{

@@ -10,6 +10,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap"
+        />
+      </head>
       <body>{children}</body>
     </html>
   )
