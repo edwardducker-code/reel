@@ -50,16 +50,11 @@ export default function ChatApp({ onHome }) {
   }, [messages, typing]);
 
   async function startConversation() {
-    await wait(400);
+    await wait(500);
     setTyping(true);
-    await wait(900);
+    await wait(800);
     setTyping(false);
-    addCCMessage("Oh good, you're here. Sit, sit.", 'joy');
-    await wait(300);
-    setTyping(true);
-    await wait(700);
-    setTyping(false);
-    addCCMessage("What are we in the mood for tonight? Tell me how you want to *feel* — I'll do the rest. I've only had 65 million years to practise.", 'joy');
+    addCCMessage("What are we watching tonight? How do you want to *feel*?", 'joy');
   }
 
   function addCCMessage(text, mood = 'joy') {
@@ -109,7 +104,7 @@ export default function ChatApp({ onHome }) {
 
       setApiMessages([...newApiMessages, { role: 'assistant', content: replyText }]);
       setChipsDisabled(false);
-    } catch {
+    } catch (_err) {
       setTyping(false);
       addCCMessage("My reel seems to have jammed! Something went wrong. Try again?", 'think');
       setChipsDisabled(false);
