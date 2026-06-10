@@ -40,6 +40,7 @@ export default function ChatApp({ onHome }) {
 
   useEffect(() => {
     startConversation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -108,7 +109,7 @@ export default function ChatApp({ onHome }) {
 
       setApiMessages([...newApiMessages, { role: 'assistant', content: replyText }]);
       setChipsDisabled(false);
-    } catch (err) {
+    } catch (_err) {
       setTyping(false);
       addCCMessage("My reel seems to have jammed! Something went wrong. Try again?", 'think');
       setChipsDisabled(false);

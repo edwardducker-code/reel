@@ -26,18 +26,18 @@ export default function Landing({ onLaunch }) {
           </h1>
           <p className="hero-sub">
             Meet <b>Connossaurus</b> — a small green dinosaur with impeccable taste and zero chill about cinema.
-            Tell him your mood; he hands you the one film you didn't know you needed. No spoilers, ever.
+            Tell him your mood; he hands you the one film you didn&apos;t know you needed. No spoilers, ever.
           </p>
           <div className="hero-cta">
             <button className="btn-gold" onClick={onLaunch}>Ask Connossaurus →</button>
-            <span className="hero-cta-note">Free · no account · he's just happy you came</span>
+            <span className="hero-cta-note">Free · no account · he&apos;s just happy you came</span>
           </div>
         </div>
         <div className="hero-art">
           <div className="hero-glow"></div>
           <Connossaurus size={360} expression="joy" idle={true} />
           <div className="hero-quote">
-            "65 million years and I still cry at <span className="g">Cinema Paradiso</span>."
+            &ldquo;65 million years and I still cry at <span className="g">Cinema Paradiso</span>.&rdquo;
           </div>
         </div>
       </header>
@@ -69,7 +69,7 @@ export default function Landing({ onLaunch }) {
           <h2 className="sec-h2">Not a list. A recommendation.</h2>
           <p className="peek-p">
             Every pick comes as a <i>lobby card</i> — IMDb and Letterboxd scores, where to stream it tonight,
-            and a short, <b>spoiler-free</b> reason it's the one. Then he gets out of your way.
+            and a short, <b>spoiler-free</b> reason it&apos;s the one. Then he gets out of your way.
           </p>
           <button className="btn-ghost" onClick={onLaunch}>See him in conversation →</button>
         </div>
