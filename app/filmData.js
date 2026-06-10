@@ -1,0 +1,72 @@
+export const FILMS = {
+  paradiso: {
+    title: 'Cinema Paradiso', year: 1988, runtime: '2h 5m', rating: 'PG',
+    dir: 'Giuseppe Tornatore',
+    poster: { bg: 'linear-gradient(160deg,#6b2d2f,#2a0f12)', ink: '#F7C66B', kicker: 'NUOVO CINEMA' },
+    imdb: 8.5, letterboxd: 4.4, where: ['Max', 'Criterion'],
+    tags: ['Italy', 'Coming-of-age', 'Love letter to film'],
+    blurb: 'A filmmaker remembers the Sicilian village where, as a boy, he fell in love with the movies — and with the gruff projectionist who let him watch from the booth.',
+  },
+  budapest: {
+    title: 'The Grand Budapest Hotel', year: 2014, runtime: '1h 39m', rating: 'R',
+    dir: 'Wes Anderson',
+    poster: { bg: 'linear-gradient(160deg,#d98a9e,#b14b6a)', ink: '#3a1322', kicker: 'GRAND BUDAPEST' },
+    imdb: 8.1, letterboxd: 4.3, where: ['Disney+', 'Hulu'],
+    tags: ['Caper', 'Symmetrical', 'Wickedly funny'],
+    blurb: 'A legendary concierge and his trusted lobby boy become entangled in the theft of a priceless painting — and the fate of a grand European hotel between the wars.',
+  },
+  mood: {
+    title: 'In the Mood for Love', year: 2000, runtime: '1h 38m', rating: 'PG',
+    dir: 'Wong Kar-wai',
+    poster: { bg: 'linear-gradient(160deg,#7a1f2b,#2b0c12)', ink: '#E7B24C', kicker: '花樣年華' },
+    imdb: 8.1, letterboxd: 4.5, where: ['Max', 'Criterion'],
+    tags: ['Hong Kong', 'Yearning', 'Impossibly beautiful'],
+    blurb: 'Two neighbours in 1960s Hong Kong slowly realise their spouses are having an affair — and find an aching, restrained closeness of their own.',
+  },
+  pastlives: {
+    title: 'Past Lives', year: 2023, runtime: '1h 45m', rating: 'PG-13',
+    dir: 'Celine Song',
+    poster: { bg: 'linear-gradient(160deg,#2f4a6b,#13202f)', ink: '#E9D7B0', kicker: 'PAST LIVES' },
+    imdb: 7.8, letterboxd: 4.3, where: ['Paramount+', 'Prime'],
+    tags: ['Quietly devastating', 'Modern', 'Debut'],
+    blurb: 'Two childhood friends from Seoul reconnect across decades and continents, circling the question of who they might have been to each other.',
+  },
+  paddington: {
+    title: 'Paddington 2', year: 2017, runtime: '1h 43m', rating: 'PG',
+    dir: 'Paul King',
+    poster: { bg: 'linear-gradient(160deg,#1f6f8b,#0e3340)', ink: '#F2B23C', kicker: 'PADDINGTON 2' },
+    imdb: 8.2, letterboxd: 4.4, where: ['Max', 'Prime'],
+    tags: ['Pure-hearted', 'Funny', 'Secretly perfect'],
+    blurb: 'A polite young bear takes odd jobs to buy his aunt the perfect birthday gift — until the present is stolen and he must clear his name.',
+  },
+  whiplash: {
+    title: 'Whiplash', year: 2014, runtime: '1h 46m', rating: 'R',
+    dir: 'Damien Chazelle',
+    poster: { bg: 'linear-gradient(160deg,#3a3a3a,#0c0c0c)', ink: '#E4B33B', kicker: 'WHIPLASH' },
+    imdb: 8.5, letterboxd: 4.3, where: ['Prime', 'Apple TV'],
+    tags: ['Intense', 'Music', 'White-knuckle'],
+    blurb: 'A driven young drummer at an elite conservatory pushes himself to the brink under a teacher whose methods blur mentorship and cruelty.',
+  },
+  parasite: {
+    title: 'Parasite', year: 2019, runtime: '2h 12m', rating: 'R',
+    dir: 'Bong Joon-ho',
+    poster: { bg: 'linear-gradient(160deg,#1a1a2e,#16213e)', ink: '#E4B33B', kicker: '기생충' },
+    imdb: 8.5, letterboxd: 4.5, where: ['Max', 'Hulu'],
+    tags: ['Korean', 'Class', 'Genre-shifting'],
+    blurb: 'A cash-strapped family schemes their way into the lives of a wealthy household — until an unexpected discovery upends everyone\'s plans.',
+  },
+  mulholland: {
+    title: 'Mulholland Drive', year: 2001, runtime: '2h 27m', rating: 'R',
+    dir: 'David Lynch',
+    poster: { bg: 'linear-gradient(160deg,#1a0533,#0d0d1a)', ink: '#C9973A', kicker: 'MULHOLLAND DR.' },
+    imdb: 7.9, letterboxd: 4.4, where: ['Max', 'Criterion'],
+    tags: ['Dreamlike', 'Hollywood noir', 'Unforgettable'],
+    blurb: 'A bright-eyed aspiring actress arrives in Hollywood and befriends a mysterious amnesiac woman — reality and dream blurring with every scene.',
+  },
+};
+
+export const STREAM_STYLE = {
+  'Max': '#0046FF', 'Criterion': '#16243C', 'Disney+': '#0a2a6b',
+  'Hulu': '#1ce783', 'Paramount+': '#0064ff', 'Prime': '#00A8E1',
+  'Apple TV': '#111', 'Netflix': '#E50914',
+};
