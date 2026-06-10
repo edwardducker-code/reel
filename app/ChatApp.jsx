@@ -109,7 +109,7 @@ export default function ChatApp({ onHome }) {
 
       setApiMessages([...newApiMessages, { role: 'assistant', content: replyText }]);
       setChipsDisabled(false);
-    } catch (_err) {
+    } catch {
       setTyping(false);
       addCCMessage("My reel seems to have jammed! Something went wrong. Try again?", 'think');
       setChipsDisabled(false);
