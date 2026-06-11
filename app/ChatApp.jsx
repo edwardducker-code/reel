@@ -52,7 +52,7 @@ function extractFilmMentions(text) {
 
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist, user, onSignIn }) {
+export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist, onDismissFilm, dismissedFilms, user, onSignIn }) {
   const [messages, setMessages] = useState([]);
   const [apiMessages, setApiMessages] = useState([]);
   const [typing, setTyping] = useState(false);
@@ -190,7 +190,9 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
                   title={msg.title}
                   year={msg.year}
                   onAdd={onAddToWatchlist}
+                  onDismiss={onDismissFilm}
                   isAdded={watchlistTitles.has(msg.title)}
+                  isDismissed={(dismissedFilms || []).some(f => f.title === msg.title)}
                 />
               </div>
             );

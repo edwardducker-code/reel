@@ -11,6 +11,7 @@ export default function Home() {
   const [view, setView] = useState('landing')
   const [user, setUser] = useState<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [watchlist, setWatchlist] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any
+  const [dismissedFilms, setDismissedFilms] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [showAuth, setShowAuth] = useState(false)
   const [authLoading, setAuthLoading] = useState(true)
 
@@ -75,6 +76,8 @@ export default function Home() {
           }}
           user={user}
           onSignIn={() => setShowAuth(true)}
+          dismissedFilms={dismissedFilms}
+          onDismissFilm={(film: any) => setDismissedFilms(prev => [...prev, film])} // eslint-disable-line @typescript-eslint/no-explicit-any
         />
       )}
 
