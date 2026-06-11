@@ -55,6 +55,7 @@ const wait = (ms) => new Promise(r => setTimeout(r, ms));
 export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist, onDismissFilm: onDismissFilmProp, dismissedFilms, user, onSignIn }) {
   const [messages, setMessages] = useState([]);
   const [apiMessages, setApiMessages] = useState([]);
+  const apiMessagesRef = useRef([]);
   const [typing, setTyping] = useState(false);
   const [chips, setChips] = useState(INITIAL_CHIPS);
   const [inputValue, setInputValue] = useState('');
@@ -96,8 +97,9 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
 
   async function sendSilent(apiText) {
     setTyping(true);
-    const newApiMessages = [...apiMessages, { role: 'user', content: apiText }];
+    const newApiMessages = [...apiMessagesRef.current, { role: 'user', content: apiText }];
     setApiMessages(newApiMessages);
+    apiMessagesRef.current = newApiMessages;
     try {
       const tasteProfile = user ? await buildTasteProfile(user.id) : "";
       const res = await fetch("/api/chat", {
