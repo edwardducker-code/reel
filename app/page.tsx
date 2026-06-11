@@ -66,6 +66,7 @@ export default function Home() {
           watchlist={[]}
           onAddToWatchlist={() => {}}
           user={user}
+          onSignIn={() => setShowAuth(true)}
         />
       )}
 

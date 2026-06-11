@@ -52,7 +52,7 @@ function extractFilmMentions(text) {
 
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist, user }) {
+export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist, user, onSignIn }) {
   const [messages, setMessages] = useState([]);
   const [apiMessages, setApiMessages] = useState([]);
   const [typing, setTyping] = useState(false);
@@ -162,6 +162,14 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
         >
           🎬 My Reel {watchlist.length > 0 && <span style={{ background: 'var(--gold)', color: '#1a1206', borderRadius: 999, fontSize: 11, fontWeight: 700, padding: '1px 6px' }}>{watchlist.length}</span>}
         </button>
+        {!user && (
+          <button
+            onClick={onSignIn}
+            style={{ fontFamily: "'Instrument Sans',sans-serif", fontSize: 13, fontWeight: 600, color: 'var(--gold)', background: 'transparent', border: '1px solid var(--gold)', borderRadius: 9, padding: '7px 14px', cursor: 'pointer' }}
+          >
+            Sign In
+          </button>
+        )}
       </header>
 
       <div className="chat-scroll" ref={scrollRef} style={{ padding: '22px clamp(14px,4vw,40px)' }}>
