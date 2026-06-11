@@ -5,10 +5,12 @@ import ChatApp from './ChatApp'
 import MyReel from './MyReel'
 import AuthModal from './AuthModal'
 import { createClient } from './lib/supabase'
+import { saveFilmToReel } from './watchlistHelpers'
 
 export default function Home() {
   const [view, setView] = useState('landing')
   const [user, setUser] = useState<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any
+  const [watchlist, setWatchlist] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [showAuth, setShowAuth] = useState(false)
   const [authLoading, setAuthLoading] = useState(true)
 
@@ -63,8 +65,14 @@ export default function Home() {
         <ChatApp
           onHome={() => setView('landing')}
           onMyReel={handleMyReelClick}
-          watchlist={[]}
-          onAddToWatchlist={() => {}}
+          watchlist={watchlist}
+          onAddToWatchlist={async (film: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+            if (!user) { setShowAuth(true); return; }
+            const result = await saveFilmToReel(film, user.id);
+            if (result.success) {
+              setWatchlist(prev => [...prev, { film, status: 'saved', id: Date.now() }]);
+            }
+          }}
           user={user}
           onSignIn={() => setShowAuth(true)}
         />
