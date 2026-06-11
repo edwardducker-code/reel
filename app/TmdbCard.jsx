@@ -67,7 +67,7 @@ export default function TmdbCard({ title, year, onAdd, onDismiss, isAdded, isDis
     },
     onSwipedLeft: () => {
       setExiting('left');
-      setTimeout(() => onDismiss && onDismiss(film), 300);
+      if (onDismiss) onDismiss(film);
     },
     onTouchEndOrOnMouseUp: () => {
       if (!exiting) { setSwipeDelta(0); setSwipeDir(null); }
@@ -188,7 +188,7 @@ export default function TmdbCard({ title, year, onAdd, onDismiss, isAdded, isDis
           ) : (
             <>
               <button
-                onClick={() => { setExiting('left'); setTimeout(() => onDismiss && onDismiss(film), 300); }}
+                onClick={() => { setExiting('left'); if (onDismiss) onDismiss(film); }}
                 style={{ width: 44, height: 38, borderRadius: 8, border: '1px solid rgba(224,85,85,0.4)', background: 'rgba(224,85,85,0.08)', color: '#e05555', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                 title="Not for me"
               >
