@@ -1,6 +1,6 @@
 'use client';
 import { ConnoIcon } from './Connossaurus';
-import { FILMS, STREAM_STYLE } from './filmData';
+import { STREAM_STYLE } from './filmData';
 
 function PosterTile({ film, w = 100 }) {
   const p = film.poster;

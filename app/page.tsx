@@ -7,7 +7,8 @@ import MyReel from './MyReel';
 const THEMES = ['velvet', 'foyer', 'daily'];
 const THEME_COLORS: Record<string, string> = { velvet: '#2D4A3E', foyer: '#0F0D0B', daily: '#EDE7DA' };
 
-type WatchlistEntry = { film: any; status: 'saved' | 'seen' };
+type FilmData = Record<string, unknown>;
+type WatchlistEntry = { film: FilmData; status: 'saved' | 'seen' };
 type View = 'landing' | 'chat' | 'myreel';
 
 export default function Home() {
@@ -31,7 +32,7 @@ export default function Home() {
     localStorage.setItem('reel-watchlist', JSON.stringify(watchlist));
   }, [watchlist]);
 
-  function handleAddToWatchlist(film: any) {
+  function handleAddToWatchlist(film: FilmData) {
     setWatchlist(prev => {
       const exists = prev.find(e => e.film.title === film.title);
       if (exists) return prev;
@@ -39,7 +40,7 @@ export default function Home() {
     });
   }
 
-  function handleToggleSeen(film: any) {
+  function handleToggleSeen(film: FilmData) {
     setWatchlist(prev => prev.map(e =>
       e.film.title === film.title
         ? { ...e, status: e.status === 'seen' ? 'saved' : 'seen' }
@@ -47,7 +48,7 @@ export default function Home() {
     ));
   }
 
-  function handleRemove(film: any) {
+  function handleRemove(film: FilmData) {
     setWatchlist(prev => prev.filter(e => e.film.title !== film.title));
   }
 

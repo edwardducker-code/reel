@@ -76,6 +76,7 @@ export default function TmdbCard({ title, year, onAdd, isAdded }) {
 
       {/* Poster */}
       <div style={{ width: 128, flexShrink: 0 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         {posterUrl ? (
           <img
             src={posterUrl}
