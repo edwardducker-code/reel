@@ -52,7 +52,7 @@ function extractFilmMentions(text) {
 
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist, onDismissFilm, dismissedFilms, user, onSignIn }) {
+export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist, onDismissFilm: onDismissFilmProp, dismissedFilms, user, onSignIn }) {
   const [messages, setMessages] = useState([]);
   const [apiMessages, setApiMessages] = useState([]);
   const [typing, setTyping] = useState(false);
@@ -92,6 +92,30 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
     films.forEach((film, i) => {
       setMessages(prev => [...prev, { type: 'tmdb', title: film.title, year: film.year, id: Date.now() + Math.random() + i }]);
     });
+  }
+
+  async function sendSilent(apiText) {
+    setTyping(true);
+    const newApiMessages = [...apiMessages, { role: 'user', content: apiText }];
+    setApiMessages(newApiMessages);
+    try {
+      const tasteProfile = user ? await buildTasteProfile(user.id) : "";
+      const res = await fetch("/api/chat", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: newApiMessages, systemPrompt: SYSTEM_PROMPT + tasteProfile }),
+      });
+      const data = await res.json();
+      const replyText = data.text || "My reel seems to have jammed. Try again?";
+      setTyping(false);
+      const mood = detectMood(replyText);
+      const films = extractFilmMentions(replyText);
+      addCCMessage(replyText, mood);
+      if (films.length > 0) { await wait(300); addFilmCards(films); }
+      setApiMessages([...newApiMessages, { role: 'assistant', content: replyText }]);
+    } catch {
+      setTyping(false);
+    }
   }
 
   async function sendMessage(userText) {
@@ -143,6 +167,11 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
   }
 
   const watchlistTitles = new Set(watchlist.map(e => e.film.title));
+
+  function onDismissFilm(film) {
+    if (onDismissFilmProp) onDismissFilmProp(film);
+    sendSilent(`Not for me — suggest a different film please.`);
+  }
 
   return (
     <div className="reel-app">
