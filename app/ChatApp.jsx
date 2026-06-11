@@ -4,6 +4,7 @@ import { ConnoIcon } from './Connossaurus';
 import { ChatBubble, TypingDots, QuickChips, renderText } from './components';
 import TmdbCard from './TmdbCard';
 import { SYSTEM_PROMPT } from './systemPrompt';
+import { buildTasteProfile } from './lib/tasteProfile';
 
 const INITIAL_CHIPS = ['Make me cry (the good kind)', 'Something beautiful', 'Cheer me up', 'Surprise me', 'Something intense', 'Watch with family'];
 
@@ -51,7 +52,7 @@ function extractFilmMentions(text) {
 
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist }) {
+export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist, user }) {
   const [messages, setMessages] = useState([]);
   const [apiMessages, setApiMessages] = useState([]);
   const [typing, setTyping] = useState(false);
@@ -105,10 +106,11 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist 
     setTyping(true);
 
     try {
-      const res = await fetch('/api/chat', {
+      const tasteProfile = user ? await buildTasteProfile(user.id) : "";
+      const res = await fetch("/api/chat", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newApiMessages, systemPrompt: SYSTEM_PROMPT }),
+        body: JSON.stringify({ messages: newApiMessages, systemPrompt: SYSTEM_PROMPT + tasteProfile }),
       });
       const data = await res.json();
       const replyText = data.text || "My reel seems to have jammed. Try again?";
