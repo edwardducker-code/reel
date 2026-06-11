@@ -172,7 +172,7 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
 
   function onDismissFilm(film) {
     if (onDismissFilmProp) onDismissFilmProp(film);
-    sendSilent(`Not for me — suggest a different film please.`);
+    sendSilent(`I dismissed ${film.title || 'that film'} — it's not for me. Please suggest a completely different film, different genre and mood. Do not suggest ${film.title || 'that film'} again.`);
   }
 
   return (
