@@ -1,35 +1,57 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { ConnoIcon } from './Connossaurus';
-import { ChatBubble, TypingDots, QuickChips, RecCard, renderText, FILMS } from './components';
+import { ChatBubble, TypingDots, QuickChips, renderText } from './components';
+import TmdbCard from './TmdbCard';
 import { SYSTEM_PROMPT } from './systemPrompt';
 
-const INITIAL_CHIPS = ['Make me cry (the good kind)', 'Something beautiful', 'Cheer me up', 'Surprise me', 'I want something intense', 'Something I can watch with family'];
+const INITIAL_CHIPS = ['Make me cry (the good kind)', 'Something beautiful', 'Cheer me up', 'Surprise me', 'Something intense', 'Watch with family'];
 
 function detectMood(text) {
   const t = text.toLowerCase();
-  if (t.includes('cry') || t.includes('sad') || t.includes('emotional') || t.includes('ach')) return 'teary';
-  if (t.includes('laugh') || t.includes('fun') || t.includes('cheer') || t.includes('happy') || t.includes('comfort')) return 'joy';
-  if (t.includes('beautiful') || t.includes('stunning') || t.includes('gorgeous') || t.includes('wow')) return 'awe';
-  if (t.includes('intense') || t.includes('thriller') || t.includes('think') || t.includes('mind')) return 'think';
-  if (t.includes('perfect') || t.includes('exactly') || t.includes('yes')) return 'smug';
+  if (t.includes('cry') || t.includes('sad') || t.includes('devastating')) return 'teary';
+  if (t.includes('laugh') || t.includes('fun') || t.includes('cheer') || t.includes('happy') || t.includes('feel-good')) return 'joy';
+  if (t.includes('beautiful') || t.includes('stunning') || t.includes('visual')) return 'awe';
+  if (t.includes('intense') || t.includes('thriller') || t.includes('think') || t.includes('dark')) return 'think';
+  if (t.includes('perfect') || t.includes('exactly') || t.includes('great pick')) return 'smug';
   return 'joy';
 }
 
-function extractFilmRecs(text) {
-  const filmIds = [];
-  const lowerText = text.toLowerCase();
-  Object.entries(FILMS).forEach(([id, film]) => {
-    if (lowerText.includes(film.title.toLowerCase())) {
-      filmIds.push(id);
+// Extract film title + optional year from Claude's response
+// Matches patterns like: 🎬 Title (Year), **Title** (Year), Title (Year) — Director
+function extractFilmMentions(text) {
+  const films = [];
+  const seen = new Set();
+
+  // Pattern 1: 🎬 Title (Year)
+  const emojiPattern = /🎬\s+([^()\n—–-]+?)\s*(?:\((\d{4})\))?(?:\s*[—–-])/g;
+  let m;
+  while ((m = emojiPattern.exec(text)) !== null) {
+    const title = m[1].trim();
+    const year = m[2] || null;
+    if (title && !seen.has(title.toLowerCase())) {
+      seen.add(title.toLowerCase());
+      films.push({ title, year });
     }
-  });
-  return filmIds;
+  }
+
+  // Pattern 2: • Title (Year) — for "Also on your radar" lines
+  const bulletPattern = /[•\*]\s+\*{0,2}([^•\*()\n]+?)\*{0,2}\s+\((\d{4})[^)]*\)/g;
+  while ((m = bulletPattern.exec(text)) !== null) {
+    const title = m[1].trim();
+    const year = m[2] || null;
+    if (title && !seen.has(title.toLowerCase())) {
+      seen.add(title.toLowerCase());
+      films.push({ title, year });
+    }
+  }
+
+  return films;
 }
 
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-export default function ChatApp({ onHome }) {
+export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist }) {
   const [messages, setMessages] = useState([]);
   const [apiMessages, setApiMessages] = useState([]);
   const [typing, setTyping] = useState(false);
@@ -65,8 +87,10 @@ export default function ChatApp({ onHome }) {
     setMessages(prev => [...prev, { type: 'user', text, id: Date.now() + Math.random() }]);
   }
 
-  function addRecCard(filmId) {
-    setMessages(prev => [...prev, { type: 'rec', filmId, id: Date.now() + Math.random() }]);
+  function addFilmCards(films) {
+    films.forEach((film, i) => {
+      setMessages(prev => [...prev, { type: 'tmdb', title: film.title, year: film.year, id: Date.now() + Math.random() + i }]);
+    });
   }
 
   async function sendMessage(userText) {
@@ -78,7 +102,6 @@ export default function ChatApp({ onHome }) {
 
     const newApiMessages = [...apiMessages, { role: 'user', content: userText }];
     setApiMessages(newApiMessages);
-
     setTyping(true);
 
     try {
@@ -88,25 +111,24 @@ export default function ChatApp({ onHome }) {
         body: JSON.stringify({ messages: newApiMessages, systemPrompt: SYSTEM_PROMPT }),
       });
       const data = await res.json();
-      const replyText = data.text || "Hmm, my film reel seems to have jammed. Try again?";
+      const replyText = data.text || "My reel seems to have jammed. Try again?";
 
       setTyping(false);
-
       const mood = detectMood(replyText);
-      const filmRecs = extractFilmRecs(replyText);
+      const films = extractFilmMentions(replyText);
 
       addCCMessage(replyText, mood);
 
-      for (const filmId of filmRecs) {
-        await wait(400);
-        addRecCard(filmId);
+      if (films.length > 0) {
+        await wait(300);
+        addFilmCards(films);
       }
 
       setApiMessages([...newApiMessages, { role: 'assistant', content: replyText }]);
       setChipsDisabled(false);
-    } catch (_err) {
+    } catch {
       setTyping(false);
-      addCCMessage("My reel seems to have jammed! Something went wrong. Try again?", 'think');
+      addCCMessage("My reel seems to have jammed. Try again?", 'think');
       setChipsDisabled(false);
     }
   }
@@ -117,6 +139,8 @@ export default function ChatApp({ onHome }) {
       sendMessage(inputValue);
     }
   }
+
+  const watchlistTitles = new Set(watchlist.map(e => e.film.title));
 
   return (
     <div className="reel-app">
@@ -130,7 +154,12 @@ export default function ChatApp({ onHome }) {
             in conversation with Connossaurus
           </span>
         </div>
-        <div className="app-bar-status"><span className="dot-live"></span> here now</div>
+        <button
+          onClick={onMyReel}
+          style={{ fontFamily: "'Instrument Sans',sans-serif", fontSize: 13, fontWeight: 600, color: 'var(--ink-soft)', background: 'var(--chip-bg)', border: '1px solid var(--hairline)', borderRadius: 9, padding: '7px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+        >
+          🎬 My Reel {watchlist.length > 0 && <span style={{ background: 'var(--gold)', color: '#1a1206', borderRadius: 999, fontSize: 11, fontWeight: 700, padding: '1px 6px' }}>{watchlist.length}</span>}
+        </button>
       </header>
 
       <div className="chat-scroll" ref={scrollRef} style={{ padding: '22px clamp(14px,4vw,40px)' }}>
@@ -145,15 +174,16 @@ export default function ChatApp({ onHome }) {
             if (msg.type === 'user') return (
               <ChatBubble key={msg.id} from="user">{msg.text}</ChatBubble>
             );
-            if (msg.type === 'rec') {
-              const film = FILMS[msg.filmId];
-              if (!film) return null;
-              return (
-                <div key={msg.id} className="rec-wrap">
-                  <RecCard film={film} />
-                </div>
-              );
-            }
+            if (msg.type === 'tmdb') return (
+              <div key={msg.id} className="rec-wrap">
+                <TmdbCard
+                  title={msg.title}
+                  year={msg.year}
+                  onAdd={onAddToWatchlist}
+                  isAdded={watchlistTitles.has(msg.title)}
+                />
+              </div>
+            );
             return null;
           })}
           {typing && <TypingDots />}
@@ -185,7 +215,7 @@ export default function ChatApp({ onHome }) {
             </svg>
           </button>
         </div>
-        <div className="composer-hint">Press Enter or tap a suggestion above · Connossaurus never spoils</div>
+        <div className="composer-hint">Press Enter or tap a suggestion · Connossaurus never spoils</div>
       </footer>
     </div>
   );

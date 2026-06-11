@@ -11,17 +11,13 @@ function PosterTile({ film, w = 132 }) {
       position: 'relative', background: p.bg, boxShadow: '0 10px 26px rgba(0,0,0,.45)',
       border: '1px solid rgba(255,255,255,.08)',
     }}>
-      <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: 9, background:
-        'repeating-linear-gradient(180deg, rgba(0,0,0,.55) 0 6px, transparent 6px 13px)' }}></div>
-      <div style={{ position: 'absolute', top: 0, bottom: 0, right: 0, width: 9, background:
-        'repeating-linear-gradient(180deg, rgba(0,0,0,.55) 0 6px, transparent 6px 13px)' }}></div>
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-        justifyContent: 'space-between', padding: '14px 16px', color: p.ink }}>
+      <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: 9, background: 'repeating-linear-gradient(180deg, rgba(0,0,0,.55) 0 6px, transparent 6px 13px)' }}></div>
+      <div style={{ position: 'absolute', top: 0, bottom: 0, right: 0, width: 9, background: 'repeating-linear-gradient(180deg, rgba(0,0,0,.55) 0 6px, transparent 6px 13px)' }}></div>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '14px 16px', color: p.ink }}>
         <div style={{ fontFamily: "'Instrument Sans',sans-serif", fontSize: 8.5, letterSpacing: '.22em', opacity: .85, fontWeight: 600 }}>{p.kicker}</div>
         <div style={{ fontFamily: "'Gloock',serif", fontSize: w * 0.16, lineHeight: 1.02 }}>{film.title}</div>
       </div>
-      <div style={{ position: 'absolute', inset: 0, background:
-        'radial-gradient(120% 80% at 30% 10%, rgba(255,255,255,.12), transparent 55%)' }}></div>
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(120% 80% at 30% 10%, rgba(255,255,255,.12), transparent 55%)' }}></div>
     </div>
   );
 }
@@ -48,15 +44,14 @@ function WhereChips({ film }) {
       <span style={{ fontFamily: "'Instrument Sans',sans-serif", fontSize: 11, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--muted)', marginRight: 2 }}>Stream</span>
       {film.where.map((w) => (
         <span key={w} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999, fontFamily: "'Instrument Sans',sans-serif", fontWeight: 600, fontSize: 12.5, color: 'var(--ink-on-surface)', background: 'var(--chip-bg)', border: '1px solid var(--hairline)' }}>
-          <span style={{ width: 8, height: 8, borderRadius: 2, background: STREAM_STYLE[w] || '#888' }}></span>
-          {w}
+          <span style={{ width: 8, height: 8, borderRadius: 2, background: STREAM_STYLE[w] || '#888' }}></span>{w}
         </span>
       ))}
     </div>
   );
 }
 
-export function RecCard({ film, compact = false }) {
+export function RecCard({ film, compact = false, onAdd, isAdded }) {
   if (!film) return null;
   return (
     <div className="rec-card" style={{ display: 'flex', gap: compact ? 14 : 18, padding: compact ? 14 : 18, maxWidth: 560 }}>
@@ -73,6 +68,16 @@ export function RecCard({ film, compact = false }) {
         <ScoreBadges film={film} />
         <p style={{ margin: '2px 0', fontFamily: "'Crimson Pro',serif", fontSize: compact ? 15 : 16.5, lineHeight: 1.45, color: 'var(--ink-soft)' }}>{film.blurb}</p>
         <WhereChips film={film} />
+        {onAdd && (
+          <div style={{ marginTop: 4 }}>
+            <button
+              className={isAdded ? 'rc-btn rc-btn--ghost' : 'rc-btn rc-btn--gold'}
+              onClick={() => onAdd(film)}
+            >
+              {isAdded ? '✓ In my reel' : '+ Add to my reel'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
