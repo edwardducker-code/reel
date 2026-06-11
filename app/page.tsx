@@ -8,7 +8,7 @@ const THEMES = ['velvet', 'foyer', 'daily'];
 const THEME_COLORS: Record<string, string> = { velvet: '#2D4A3E', foyer: '#0F0D0B', daily: '#EDE7DA' };
 
 type FilmData = Record<string, unknown>;
-type WatchlistEntry = { film: FilmData; status: 'saved' | 'seen' };
+type WatchlistEntry = { film: FilmData; status: 'saved' | 'seen'; rating?: number; review?: string };
 type View = 'landing' | 'chat' | 'myreel';
 
 export default function Home() {
@@ -20,12 +20,9 @@ export default function Home() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Persist watchlist to localStorage
   useEffect(() => {
     const saved = localStorage.getItem('reel-watchlist');
-    if (saved) {
-      try { setWatchlist(JSON.parse(saved)); } catch {}
-    }
+    if (saved) { try { setWatchlist(JSON.parse(saved)); } catch {} }
   }, []);
 
   useEffect(() => {
@@ -40,10 +37,10 @@ export default function Home() {
     });
   }
 
-  function handleToggleSeen(film: FilmData) {
+  function handleToggleSeen(film: FilmData, rating?: number, review?: string) {
     setWatchlist(prev => prev.map(e =>
       e.film.title === film.title
-        ? { ...e, status: e.status === 'seen' ? 'saved' : 'seen' }
+        ? { ...e, status: 'seen', rating: rating ?? e.rating, review: review ?? e.review }
         : e
     ));
   }
@@ -54,22 +51,13 @@ export default function Home() {
 
   return (
     <div className="app-shell grain" data-theme={theme}>
-      {/* Theme switcher */}
       <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 100, display: 'flex', gap: 8 }}>
         {THEMES.map(t => (
-          <button
-            key={t}
-            className={`theme-btn ${theme === t ? 'active' : ''}`}
-            onClick={() => setTheme(t)}
-            title={t.charAt(0).toUpperCase() + t.slice(1)}
-            style={{ background: THEME_COLORS[t] }}
-          />
+          <button key={t} className={`theme-btn ${theme === t ? 'active' : ''}`} onClick={() => setTheme(t)} title={t} style={{ background: THEME_COLORS[t] }} />
         ))}
       </div>
 
-      {view === 'landing' && (
-        <Landing onLaunch={() => setView('chat')} />
-      )}
+      {view === 'landing' && <Landing onLaunch={() => setView('chat')} />}
       {view === 'chat' && (
         <ChatApp
           onHome={() => setView('landing')}
