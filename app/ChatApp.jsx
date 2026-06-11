@@ -47,6 +47,19 @@ function extractFilmMentions(text) {
     }
   }
 
+  // Pattern 3: fallback — any Title (Year) not already caught
+  if (films.length === 0) {
+    const fallback = /([A-Z][^.!?\n]{1,50})\s+\((\d{4})\)/g;
+    while ((m = fallback.exec(text)) !== null) {
+      const title = m[1].trim();
+      const year = m[2];
+      if (title && !seen.has(title.toLowerCase()) && title.length > 2) {
+        seen.add(title.toLowerCase());
+        films.push({ title, year });
+      }
+    }
+  }
+
   return films;
 }
 
@@ -172,7 +185,7 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
 
   function onDismissFilm(film) {
     if (onDismissFilmProp) onDismissFilmProp(film);
-    sendSilent(`I dismissed ${film.title || 'that film'} — it's not for me. Please suggest a completely different film, different genre and mood. Do not suggest ${film.title || 'that film'} again.`);
+    sendSilent(`I dismissed ${film.title || 'that film'} — not for me. Suggest one completely different film in a different genre. Use the exact format: 🎬 Title (Year) — Director`);
   }
 
   return (
