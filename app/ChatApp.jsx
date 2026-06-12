@@ -122,16 +122,13 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
       });
       const data = await res.json();
       const replyText = data.text || "My reel seems to have jammed. Try again?";
-      console.log('[sendSilent] reply:', replyText);
       setTyping(false);
       const mood = detectMood(replyText);
       const films = extractFilmMentions(replyText);
-      console.log('[sendSilent] films found:', films);
       addCCMessage(replyText, mood);
       if (films.length > 0) { await wait(300); addFilmCards(films); }
       setApiMessages([...newApiMessages, { role: 'assistant', content: replyText }]);
-    } catch (e) {
-      console.log('[sendSilent] error:', e);
+    } catch {
       setTyping(false);
     }
   }

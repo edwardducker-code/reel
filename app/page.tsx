@@ -12,6 +12,16 @@ export default function Home() {
   const [user, setUser] = useState<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [watchlist, setWatchlist] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [dismissedFilms, setDismissedFilms] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any
+
+  // Load watchlist from Supabase when user is available
+  useEffect(() => {
+    if (!user) { setWatchlist([]); return; }
+    async function loadWatchlist() {
+      const { data } = await supabase.from('watchlist').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+      if (data) setWatchlist(data);
+    }
+    loadWatchlist();
+  }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
   const [showAuth, setShowAuth] = useState(false)
   const [authLoading, setAuthLoading] = useState(true)
 

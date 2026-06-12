@@ -396,3 +396,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   .peek { grid-template-columns: 1fr; gap: 28px; }
   .nav-links { display: none; }
 }
+
+@media (pointer: coarse) {
+  :root { --swipe-hint-display: block; }
+}

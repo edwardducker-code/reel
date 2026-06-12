@@ -205,7 +205,7 @@ export default function TmdbCard({ title, year, onAdd, onDismiss, isAdded, isDis
         </div>
 
         {/* Mobile swipe hint */}
-        <p style={{ margin: 0, fontFamily: "'Instrument Sans',sans-serif", fontSize: 11, color: 'var(--muted)', textAlign: 'center', opacity: 0.6 }}>
+        <p style={{ margin: 0, fontFamily: "'Instrument Sans',sans-serif", fontSize: 11, color: 'var(--muted)', textAlign: 'center', opacity: 0.6, display: 'var(--swipe-hint-display, none)' }}>
           swipe right to save · swipe left to dismiss
         </p>
       </div>
