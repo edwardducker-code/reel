@@ -1,8 +1,9 @@
 'use client';
 import { Connossaurus, ConnoIcon } from './Connossaurus';
-import { RecCard, FILMS } from './components';
 
-export default function Landing({ onLaunch }) {
+import FeaturedCarousel from './FeaturedCarousel';
+
+export default function Landing({ onLaunch, watchlist = [], onAddToWatchlist = () => {} }) {
   return (
     <div className="landing">
       <nav className="nav">
@@ -63,20 +64,7 @@ export default function Landing({ onLaunch }) {
         </div>
       </section>
 
-      <section className="peek">
-        <div className="peek-copy">
-          <div className="eyebrow">What he hands you</div>
-          <h2 className="sec-h2">Not a list. A recommendation.</h2>
-          <p className="peek-p">
-            Every pick comes as a <i>recommendation</i> — IMDb and Letterboxd scores, where to stream it tonight,
-            and a short, <b>spoiler-free</b> reason it&apos;s the one. Then he gets out of your way.
-          </p>
-          <button className="btn-ghost" onClick={onLaunch}>See him in conversation →</button>
-        </div>
-        <div className="peek-card">
-          <RecCard film={FILMS.mood} />
-        </div>
-      </section>
+      <FeaturedCarousel watchlist={watchlist} onAdd={onAddToWatchlist || (() => {})} />
 
       <footer className="foot">
         <div className="foot-brand">

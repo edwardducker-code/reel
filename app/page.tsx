@@ -69,6 +69,16 @@ export default function Home() {
       {view === 'landing' && (
         <Landing
           onLaunch={() => setView('chat')}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // @ts-expect-error JSX prop type mismatch
+          watchlist={watchlist}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // @ts-expect-error JSX prop type mismatch
+          onAddToWatchlist={async (film: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+            if (!user) { setShowAuth(true); return; }
+            const result = await saveFilmToReel(film, user.id);
+            if (result.success) setWatchlist(prev => [...prev, { film, status: 'saved', id: Date.now() }]);
+          }}
         />
       )}
 

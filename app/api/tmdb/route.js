@@ -78,6 +78,41 @@ export async function GET(req) {
       return Response.json({ candidates });
     }
 
+    if (action === 'featured') {
+      // Fetch films across 6 different genre buckets for variety
+      const buckets = [
+        { genres: '18', minVotes: '5000', label: 'drama' },
+        { genres: '53,18', minVotes: '3000', label: 'thriller' },
+        { genres: '35', minVotes: '3000', label: 'comedy' },
+        { genres: '878,28', minVotes: '3000', label: 'scifi' },
+        { genres: '27', minVotes: '2000', label: 'horror' },
+        { genres: '12,14', minVotes: '3000', label: 'adventure' },
+      ];
+
+      const fetchBucket = async (bucket) => {
+        const page = Math.floor(Math.random() * 5) + 1;
+        const url = `${TMDB_BASE}/discover/movie?with_genres=${bucket.genres}&vote_count.gte=${bucket.minVotes}&vote_average.gte=7.0&sort_by=vote_average.desc&language=en-US&page=${page}`;
+        const res = await fetch(url, { headers });
+        const data = await res.json();
+        const results = data.results || [];
+        const pick = results[Math.floor(Math.random() * Math.min(results.length, 8))];
+        if (!pick) return null;
+        return {
+          id: pick.id,
+          title: pick.title,
+          year: pick.release_date?.split('-')[0] || '',
+          poster_path: pick.poster_path || null,
+          overview: pick.overview?.slice(0, 220) || '',
+          rating: pick.vote_average ? parseFloat(pick.vote_average.toFixed(1)) : null,
+          genre: bucket.label,
+        };
+      };
+
+      const results = await Promise.all(buckets.map(fetchBucket));
+      const films = results.filter(Boolean);
+      return Response.json({ films });
+    }
+
     return Response.json({ error: 'Unknown action' }, { status: 400 });
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
