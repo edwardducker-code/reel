@@ -3,10 +3,10 @@ import { useState, useEffect, useRef } from 'react';
 import { ConnoIcon } from './Connossaurus';
 import { ChatBubble, TypingDots, QuickChips, renderText } from './components';
 import TmdbCard from './TmdbCard';
-import { SYSTEM_PROMPT } from './systemPrompt';
+import { SYSTEM_PROMPT, WATCHLIST_PROMPT } from './systemPrompt';
 import { buildTasteProfile } from './lib/tasteProfile';
 
-const INITIAL_CHIPS = ['Make me cry (the good kind)', 'Something beautiful', 'Cheer me up', 'Surprise me', 'Something intense', 'Watch with family'];
+const INITIAL_CHIPS = ['Make me cry (the good kind)', 'Something beautiful', 'Cheer me up', 'Surprise me', 'Something intense', 'Watch with family', '📋 Build my watchlist'];
 
 function detectMood(text) {
   const t = text.toLowerCase();
@@ -65,17 +65,6 @@ function extractFilmMentions(text) {
 
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-function extractDiscoverTag(text) {
-  const match = text.match(/\[DISCOVER:([^\]]+)\]/);
-  if (!match) return null;
-  const params = {};
-  match[1].split(';').forEach(part => {
-    const [key, val] = part.split('=');
-    if (key && val) params[key.trim()] = val.trim();
-  });
-  return params;
-}
-
 function stripDiscoverTag(text) {
   return text.replace(/\[DISCOVER:[^\]]+\]/g, '').trim();
 }
@@ -101,6 +90,7 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
   const [chips, setChips] = useState(INITIAL_CHIPS);
   const [inputValue, setInputValue] = useState('');
   const [chipsDisabled, setChipsDisabled] = useState(false);
+  const [isWatchlistMode, setIsWatchlistMode] = useState(false);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -142,11 +132,10 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
     setApiMessages(newApiMessages);
     apiMessagesRef.current = newApiMessages;
     try {
-      const tasteProfile = user ? await buildTasteProfile(user.id) : "";
       const res = await fetch("/api/chat", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newApiMessages, systemPrompt: SYSTEM_PROMPT + tasteProfile }),
+        body: JSON.stringify({ messages: newApiMessages, systemPrompt: systemWithTaste }),
       });
       const data = await res.json();
       const replyText = data.text || "My reel seems to have jammed. Try again?";
@@ -168,30 +157,67 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
     addUserMessage(userText);
     setInputValue('');
 
+    // Detect watchlist trigger
+    const isWatchlistTrigger = userText.toLowerCase().includes('build my watchlist') ||
+      userText.toLowerCase().includes('watchlist') ||
+      userText.toLowerCase().includes('build me a list');
+
+    if (isWatchlistTrigger && !isWatchlistMode) {
+      setIsWatchlistMode(true);
+    }
+
+    const activePrompt = (isWatchlistMode || isWatchlistTrigger) ? WATCHLIST_PROMPT : SYSTEM_PROMPT;
+    const tasteProfile = user ? await buildTasteProfile(user.id) : "";
+    const systemWithTaste = activePrompt + tasteProfile;
+
     const newApiMessages = [...apiMessages, { role: 'user', content: userText }];
     setApiMessages(newApiMessages);
+    apiMessagesRef.current = newApiMessages;
     setTyping(true);
 
     try {
-      const tasteProfile = user ? await buildTasteProfile(user.id) : "";
       const res = await fetch("/api/chat", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newApiMessages, systemPrompt: SYSTEM_PROMPT + tasteProfile }),
+        body: JSON.stringify({ messages: newApiMessages, systemPrompt: systemWithTaste }),
       });
       const data = await res.json();
       let replyText = data.text || "My reel seems to have jammed. Try again?";
 
-      // Check for discover tag
-      const discoverParams = extractDiscoverTag(replyText);
+      // Check for discover tags (single or multiple for watchlist)
       const cleanReply = stripDiscoverTag(replyText);
+      const allDiscoverTags = [...replyText.matchAll(/\[DISCOVER:([^\]]+)\]/g)].map(m => {
+        const params = {};
+        m[1].split(';').forEach(part => {
+          const [key, val] = part.split('=');
+          if (key && val) params[key.trim()] = val.trim();
+        });
+        return params;
+      });
 
-      if (discoverParams) {
-        // Fetch real candidates from TMDB
-        const candidates = await fetchCandidates(discoverParams);
+      if (allDiscoverTags.length > 1) {
+        // WATCHLIST MODE — fetch candidates for each film in parallel
+        const allCandidates = await Promise.all(allDiscoverTags.map(p => fetchCandidates(p)));
+
+        const pickMessages = [
+          ...newApiMessages,
+          { role: 'assistant', content: cleanReply },
+          { role: 'user', content: `Here are candidate films from TMDB for each slot in the watchlist. For each slot, pick the single best film. Output the full watchlist using the exact format: 🎬 TITLE (Year) — Director. One film per line, no [DISCOVER] tags.\n\n${allCandidates.map((candidates, i) => `Slot ${i+1}: ${candidates.slice(0,8).map(c => `${c.title} (${c.year}) — ${c.rating}★`).join(', ')}`).join('\n')}` }
+        ];
+
+        const pickRes = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: pickMessages, systemPrompt: WATCHLIST_PROMPT }),
+        });
+        const pickData = await pickRes.json();
+        replyText = pickData.text || cleanReply;
+
+      } else if (allDiscoverTags.length === 1) {
+        // SINGLE RECOMMENDATION MODE
+        const candidates = await fetchCandidates(allDiscoverTags[0]);
 
         if (candidates.length > 0) {
-          // Second Anthropic call — pick best candidate
           const candidateList = candidates.map((c, i) =>
             `${i + 1}. ${c.title} (${c.year}) — ${c.rating}★ — ${c.overview}`
           ).join('\n');
