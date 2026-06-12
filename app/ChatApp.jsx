@@ -65,6 +65,34 @@ function extractFilmMentions(text) {
 
 const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
+function extractDiscoverTag(text) {
+  const match = text.match(/\[DISCOVER:([^\]]+)\]/);
+  if (!match) return null;
+  const params = {};
+  match[1].split(';').forEach(part => {
+    const [key, val] = part.split('=');
+    if (key && val) params[key.trim()] = val.trim();
+  });
+  return params;
+}
+
+function stripDiscoverTag(text) {
+  return text.replace(/\[DISCOVER:[^\]]+\]/g, '').trim();
+}
+
+async function fetchCandidates(params) {
+  const qs = new URLSearchParams({
+    action: 'discover',
+    genres: params.genres || '18',
+    minyear: params.minyear || '1970',
+    minvotes: params.minvotes || '500',
+  });
+  const res = await fetch(`/api/tmdb?${qs}`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.candidates || [];
+}
+
 export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist, onDismissFilm: onDismissFilmProp, dismissedFilms, user, onSignIn }) {
   const [messages, setMessages] = useState([]);
   const [apiMessages, setApiMessages] = useState([]);
@@ -152,7 +180,41 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
         body: JSON.stringify({ messages: newApiMessages, systemPrompt: SYSTEM_PROMPT + tasteProfile }),
       });
       const data = await res.json();
-      const replyText = data.text || "My reel seems to have jammed. Try again?";
+      let replyText = data.text || "My reel seems to have jammed. Try again?";
+
+      // Check for discover tag
+      const discoverParams = extractDiscoverTag(replyText);
+      const cleanReply = stripDiscoverTag(replyText);
+
+      if (discoverParams) {
+        // Fetch real candidates from TMDB
+        const candidates = await fetchCandidates(discoverParams);
+
+        if (candidates.length > 0) {
+          // Second Anthropic call — pick best candidate
+          const candidateList = candidates.map((c, i) =>
+            `${i + 1}. ${c.title} (${c.year}) — ${c.rating}★ — ${c.overview}`
+          ).join('\n');
+
+          const pickMessages = [
+            ...newApiMessages,
+            { role: 'assistant', content: cleanReply },
+            { role: 'user', content: `Here are 15 real films from TMDB matching the mood. Pick the single best one for this person based on our conversation. Present it in your exact recommendation format: 🎬 TITLE (Year) — Director. Do not append a [DISCOVER] tag this time.\n\n${candidateList}` }
+          ];
+
+          const pickRes = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: pickMessages, systemPrompt: SYSTEM_PROMPT }),
+          });
+          const pickData = await pickRes.json();
+          replyText = pickData.text || cleanReply;
+        } else {
+          replyText = cleanReply;
+        }
+      } else {
+        replyText = cleanReply;
+      }
 
       setTyping(false);
       const mood = detectMood(replyText);
@@ -165,7 +227,9 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
         addFilmCards(films);
       }
 
-      setApiMessages([...newApiMessages, { role: 'assistant', content: replyText }]);
+      const finalMessages = [...newApiMessages, { role: 'assistant', content: replyText }];
+      setApiMessages(finalMessages);
+      apiMessagesRef.current = finalMessages;
       setChipsDisabled(false);
     } catch {
       setTyping(false);

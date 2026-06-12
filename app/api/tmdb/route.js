@@ -57,6 +57,27 @@ export async function GET(req) {
       });
     }
 
+    if (action === 'discover') {
+      const genres = searchParams.get('genres') || '18';
+      const minYear = searchParams.get('minyear') || '1970';
+      const minVotes = searchParams.get('minvotes') || '500';
+      const page = Math.floor(Math.random() * 8) + 1;
+      const url = `${TMDB_BASE}/discover/movie?with_genres=${genres}&primary_release_date.gte=${minYear}-01-01&vote_count.gte=${minVotes}&vote_average.gte=6.5&sort_by=vote_average.desc&language=en-US&page=${page}`;
+      const res = await fetch(url, { headers });
+      const data = await res.json();
+      const results = data.results || [];
+      // Return 15 candidates with enough info for Connossaurus to choose
+      const candidates = results.slice(0, 15).map(f => ({
+        id: f.id,
+        title: f.title,
+        year: f.release_date?.split('-')[0] || '',
+        overview: f.overview?.slice(0, 200) || '',
+        rating: f.vote_average ? parseFloat(f.vote_average.toFixed(1)) : null,
+        votes: f.vote_count,
+      }));
+      return Response.json({ candidates });
+    }
+
     return Response.json({ error: 'Unknown action' }, { status: 400 });
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
