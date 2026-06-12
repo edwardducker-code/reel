@@ -202,7 +202,7 @@ export default function ChatApp({ onHome, onMyReel, watchlist, onAddToWatchlist,
         const pickMessages = [
           ...newApiMessages,
           { role: 'assistant', content: cleanReply },
-          { role: 'user', content: `Here are candidate films from TMDB for each slot in the watchlist. For each slot, pick the single best film. Output the full watchlist using the exact format: 🎬 TITLE (Year) — Director. One film per line, no [DISCOVER] tags.\n\n${allCandidates.map((candidates, i) => `Slot ${i+1}: ${candidates.slice(0,8).map(c => `${c.title} (${c.year}) — ${c.rating}★`).join(', ')}`).join('\n')}` }
+          { role: 'user', content: `TMDB candidates for your watchlist (pick one per slot, output immediately as the final watchlist, no commentary):\n\n${allCandidates.map((candidates, i) => `Slot ${i+1}: ${candidates.slice(0,8).map(c => c.title + ' (' + c.year + ') — ' + c.rating + '★').join(' | ')}`).join('\n')}\n\nOutput the complete watchlist now using ONLY this format (one film per line):\n🎬 TITLE (Year) — Director. One sentence why it fits.\n\nNo preamble. No [DISCOVER] tags. Just the list.` }
         ];
 
         const pickRes = await fetch('/api/chat', {
