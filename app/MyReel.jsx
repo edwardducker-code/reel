@@ -361,20 +361,32 @@ function FilmEntry({ entry, onMarkSeen, onRemove }) {
 
   return (
     <div className="film-entry">
-      {film.poster && <img className="film-poster" src={film.poster} alt={film.title} />}
+      <div className="film-poster-wrap">
+        {film.poster
+          ? <img className="film-poster" src={film.poster} alt={film.title} />
+          : <div className="film-poster-fallback"><span>{film.title?.[0] || '?'}</span></div>
+        }
+        {entry.status === 'seen' && <div className="film-seen-badge">Seen</div>}
+      </div>
       <div className="film-info">
-        <p className="film-title">{film.title} {film.year ? `(${film.year})` : ''}</p>
-        {film.director && <p className="film-director">{film.director}</p>}
+        <p className="film-title">{film.title}{film.year ? <span className="film-year"> ({film.year})</span> : ''}</p>
+        {film.director && <p className="film-director">dir. {film.director}</p>}
+        {film.runtime && <p className="film-meta">{film.runtime}{film.rating ? ` · ${film.rating}` : ''}</p>}
         {entry.status === 'seen' && entry.rating && (
-          <p className="film-rating">{'★'.repeat(entry.rating)}{'☆'.repeat(5 - entry.rating)}</p>
+          <p className="film-stars">{'★'.repeat(entry.rating)}<span style={{opacity:.3}}>{'★'.repeat(5 - entry.rating)}</span></p>
         )}
-        {entry.review && <p className="film-review">&quot;{entry.review}&quot;</p>}
+        {entry.review && <p className="film-review">&ldquo;{entry.review}&rdquo;</p>}
+        {film.streaming && film.streaming.length > 0 && (
+          <div className="film-streaming">
+            {film.streaming.map(s => <span key={s} className="film-stream-chip">{s}</span>)}
+          </div>
+        )}
       </div>
       <div className="film-actions">
         {entry.status === 'saved' && (
-          <button className="film-btn seen" onClick={onMarkSeen}>✓ Seen it</button>
+          <button className="film-btn seen" onClick={onMarkSeen}>Mark seen</button>
         )}
-        <button className="film-btn remove" onClick={onRemove}>✕</button>
+        <button className="film-btn remove" onClick={onRemove}>Remove</button>
       </div>
 
       <style jsx>{`

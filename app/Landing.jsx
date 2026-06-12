@@ -51,7 +51,7 @@ export default function Landing({ onLaunch }) {
           {[
             ['joy', 'Tell him your mood', 'Cry? Laugh? Be dazzled? Connossaurus speaks fluent feeling — just say it plainly.'],
             ['think', 'He reads the room', 'Six expressions, one obsessive memory. He weighs tone, runtime, and where you can actually watch it.'],
-            ['smug', 'You get a lobby card', 'Scores, streaming, and a spoiler-free why — handed over like a film he\'s been dying to show you.'],
+            ['smug', 'You get a recommendation', 'Scores, streaming, and a spoiler-free why — handed over like a film he\'s been dying to show you.'],
           ].map(([mood, title, desc], i) => (
             <div className="how-card" key={i}>
               <ConnoIcon size={66} bg="var(--cc-avatar-bg)" shape="circle" expression={mood} ring />
@@ -68,7 +68,7 @@ export default function Landing({ onLaunch }) {
           <div className="eyebrow">What he hands you</div>
           <h2 className="sec-h2">Not a list. A recommendation.</h2>
           <p className="peek-p">
-            Every pick comes as a <i>lobby card</i> — IMDb and Letterboxd scores, where to stream it tonight,
+            Every pick comes as a <i>recommendation</i> — IMDb and Letterboxd scores, where to stream it tonight,
             and a short, <b>spoiler-free</b> reason it&apos;s the one. Then he gets out of your way.
           </p>
           <button className="btn-ghost" onClick={onLaunch}>See him in conversation →</button>

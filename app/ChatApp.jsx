@@ -6,7 +6,7 @@ import TmdbCard from './TmdbCard';
 import { SYSTEM_PROMPT, WATCHLIST_PROMPT } from './systemPrompt';
 import { buildTasteProfile } from './lib/tasteProfile';
 
-const INITIAL_CHIPS = ['Make me cry (the good kind)', 'Something beautiful', 'Cheer me up', 'Surprise me', 'Something intense', 'Watch with family', '📋 Build my watchlist'];
+const INITIAL_CHIPS = ['Make me cry (the good kind)', 'Something beautiful', 'Cheer me up', 'Surprise me', 'Something intense', 'Watch with family', 'Build my watchlist'];
 
 function detectMood(text) {
   const t = text.toLowerCase();
